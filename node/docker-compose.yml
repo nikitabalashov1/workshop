@@ -1,0 +1,9 @@
+version: "2"
+services:
+  node:
+    build: .
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "5000:5000"
+    command: "node app.js"

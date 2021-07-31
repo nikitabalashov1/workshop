@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+      PGDATA: /data/postgres
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - app-network
+    ports:
+      - '5432:5432'
+    volumes:
+      - app-db:/data/postgres
+
+  app:
+    container_name: nestserver
+    image: nestserver:1.0.0
+    build:
+      context: .
+      target: development
+      dockerfile: ./Dockerfile
+    command: npm run debug:server
+    depends_on:
+      - db
+    ports:
+      - 3001:3001
+      - 9229:9229
+    networks:
+      - app-network
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+
+# Сеть Docker используется для установления связи между контейнерами Docker и внешним миром через хост-машину
+networks:
+  app-network:
+
+# При запуске контейнера с помощью команды docker run именованный том создавался автоматически. Однако это не происходит при запуске через Compose. Необходимо определить том в разделе верхнего уровня
+volumes:
+  app-db:
